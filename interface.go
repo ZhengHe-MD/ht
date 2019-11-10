@@ -43,7 +43,7 @@ func (sk StringKey) Hash() int {
 
 	// djb2
 	for _, c := range sk {
-		h = ((h<<5)+h) + int(c)
+		h = ((h << 5) + h) + int(c)
 		h = h % math.MaxInt32
 	}
 
@@ -51,7 +51,5 @@ func (sk StringKey) Hash() int {
 }
 
 func (sk StringKey) Equals(b Hashable) bool {
-	return sk.Hash() == b.Hash()
+	return sk.Hash() == b.Hash() && sk == b
 }
-
-
