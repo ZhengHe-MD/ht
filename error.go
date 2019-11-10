@@ -3,5 +3,6 @@ package lh
 import "errors"
 
 var (
-	EntryNotFoundErr = errors.New("entry not found")
+	ErrEntryNotFound = errors.New("entry not found")
+	ErrUnhashable = errors.New("key not hashable")
 )

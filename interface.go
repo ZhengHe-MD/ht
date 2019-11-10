@@ -9,9 +9,20 @@ type Hashable interface {
 
 type HashTable interface {
 	Size() int
-	Get(key Hashable) (interface{}, bool)
-	Put(key Hashable, value interface{})
-	Remove(key Hashable) (err error)
+	Get(k interface{}) (interface{}, bool)
+	Put(k interface{}, value interface{})
+	Remove(k interface{}) (err error)
+}
+
+func toHashable(k interface{}) Hashable {
+	switch k.(type) {
+	case int:
+		return IntKey(k.(int))
+	case string:
+		return StringKey(k.(string))
+	default:
+		panic(ErrUnhashable)
+	}
 }
 
 type IntKey int

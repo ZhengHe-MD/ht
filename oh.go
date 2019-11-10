@@ -35,7 +35,7 @@ func (e *entry) get(k Hashable) (v interface{}, ok bool) {
 
 func (e *entry) remove(k Hashable) (*entry, error) {
 	if e == nil {
-		return nil, EntryNotFoundErr
+		return nil, ErrEntryNotFound
 	}
 
 	if e.k.Equals(k) {
@@ -63,19 +63,24 @@ func (h *OHT) Size() int {
 	return h.size
 }
 
-func (h *OHT) bucket(k Hashable) int {
-	return k.Hash() % len(h.table)
+func (h *OHT) bucket(hk Hashable) int {
+	return hk.Hash() % len(h.table)
 }
 
-func (h *OHT) Get(k Hashable) (v interface{}, ok bool) {
-	bucket := h.bucket(k)
-	return h.table[bucket].get(k)
+func (h *OHT) Get(k interface{}) (v interface{}, ok bool) {
+	hk := toHashable(k)
+	return h.table[h.bucket(hk)].get(hk)
 }
 
-func (h *OHT) Put(k Hashable, v interface{}) {
-	bucket := h.bucket(k)
+func (h *OHT) Put(k interface{}, v interface{}) {
+	hk := toHashable(k)
+	h.put(hk, v)
+}
+
+func (h *OHT) put(hk Hashable, v interface{}) {
+	bucket := h.bucket(hk)
 	var appended bool
-	if h.table[bucket], appended = h.table[bucket].put(k, v); appended {
+	if h.table[bucket], appended = h.table[bucket].put(hk, v); appended {
 		h.size += 1
 		// keep load <= 50%
 		if h.size * 2 > len(h.table) {
@@ -85,10 +90,11 @@ func (h *OHT) Put(k Hashable, v interface{}) {
 	return
 }
 
-func (h *OHT) Remove(k Hashable) (err error) {
-	bucket := h.bucket(k)
-	h.table[bucket], err = h.table[bucket].remove(k)
-	if err == EntryNotFoundErr {
+func (h *OHT) Remove(k interface{}) (err error) {
+	hk := toHashable(k)
+	bucket := h.bucket(hk)
+	h.table[bucket], err = h.table[bucket].remove(hk)
+	if err == ErrEntryNotFound {
 		h.size -= 1
 	}
 	return
@@ -100,7 +106,7 @@ func (h *OHT) expand() {
 	h.size = 0
 	for _, e := range h.table {
 		for ee := e; ee != nil; ee = ee.next {
-			h.Put(ee.k, ee.v)
+			h.put(ee.k, ee.v)
 		}
 	}
 }

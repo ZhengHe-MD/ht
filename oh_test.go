@@ -78,7 +78,7 @@ func TestOHEntry_remove(t *testing.T) {
 		expectedEntry *entry
 		expectedError error
 	} {
-		{nil, IntKey(1), nil, EntryNotFoundErr},
+		{nil, IntKey(1), nil, ErrEntryNotFound},
 		{&entry{IntKey(1), "v1", nil}, IntKey(1), nil, nil},
 		{
 			&entry{
@@ -102,32 +102,32 @@ func TestOHEntry_remove(t *testing.T) {
 func TestOHT_expand(t *testing.T) {
 	var oht = NewOHT(2)
 
-	oht.Put(IntKey(1), "v1")
+	oht.Put(1, "v1")
 	assert.Equal(t, 2, len(oht.table))
-	oht.Put(IntKey(2), "v2")
+	oht.Put(2, "v2")
 	assert.Equal(t, 4, len(oht.table))
-	oht.Put(IntKey(3), "v3")
-	oht.Put(IntKey(4), "v4")
-	oht.Put(IntKey(5), "v5")
+	oht.Put(3, "v3")
+	oht.Put(4, "v4")
+	oht.Put(5, "v5")
 	assert.Equal(t, 8, len(oht.table))
 }
 
 func TestOHT_basic_usage(t *testing.T) {
 	var oht = NewOHT(16)
-	oht.Put(StringKey("a"), "v1")
-	v, ok := oht.Get(StringKey("a"))
+	oht.Put("a", "v1")
+	v, ok := oht.Get("a")
 	assert.True(t, ok)
 	assert.Equal(t, "v1", v)
-	v, ok = oht.Get(StringKey("b"))
+	v, ok = oht.Get("b")
 	assert.False(t, ok)
 	assert.Equal(t, nil, v)
-	oht.Put(StringKey("b"), "v2")
-	v, ok = oht.Get(StringKey("b"))
+	oht.Put("b", "v2")
+	v, ok = oht.Get("b")
 	assert.True(t, ok)
 	assert.Equal(t, "v2", v)
-	err := oht.Remove(StringKey("a"))
+	err := oht.Remove("a")
 	assert.NoError(t, err)
-	v, ok = oht.Get(StringKey("a"))
+	v, ok = oht.Get("a")
 	assert.False(t, ok)
 	assert.Equal(t, nil, v)
 }
@@ -145,7 +145,7 @@ func TestOHT_mobydick(t *testing.T) {
 
 	var oht = NewOHT(16)
 	for _, word := range words {
-		oht.Put(StringKey(word), struct{}{})
+		oht.Put(word, struct{}{})
 	}
 
 	assert.True(t, oht.size > 0)
